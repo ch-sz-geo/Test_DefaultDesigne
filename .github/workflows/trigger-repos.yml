@@ -1,0 +1,10 @@
+
+- name: TEST
+  env:
+    GH_TOKEN: \ghs_K3RPe5i0vtr3sKHc0rtVOqIrlHACDS2A85tf
+  run: |
+    curl -X POST \
+      -H "Accept: application/vnd.github+json" \
+      -H "Authorization: Bearer $GH_TOKEN" \
+      https://api.github.com/repos/TEST/dispatches \
+      -d '{"event_type":"update-design","client_payload":{"ref":"main"}}'
