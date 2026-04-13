@@ -77,7 +77,7 @@ jobs:
 
           - name: ${STEP_NAME}
             env:
-              GH_TOKEN: "$dollar$curly$currly steps.generate-token.outputs.token }}"
+              GH_TOKEN: "$dollar$curly$curly steps.generate-token.outputs.token }}"
             run: |
               curl -X POST \\
                 -H "Accept: application/vnd.github+json" \\
