@@ -69,7 +69,7 @@ jobs:
           fi
 
           dollar="\$"
-          curly="\{"
+          curly="{"
 
           
           # Append the new step to the end of the file
