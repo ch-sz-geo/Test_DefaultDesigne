@@ -1,0 +1,83 @@
+name: Add Dispatch to Trigger Repos
+
+on:
+  repository_dispatch:
+    types: [add-dispatch-step]
+
+  # Keep manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      repo_name:
+        description: 'Full repo name (e.g. ch-sz-geo/A999)'
+        required: true
+        type: string
+      event_type:
+        description: 'Event type to send'
+        required: false
+        default: 'update-design'
+        type: string
+      ref:
+        description: 'Ref to pass in client_payload'
+        required: false
+        default: 'main'
+        type: string
+
+jobs:
+  add_dispatch_step:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve inputs
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "repo_name=${{ github.event.client_payload.repo_name }}" >> $GITHUB_OUTPUT
+            echo "event_type=${{ github.event.client_payload.event_type || 'update-design' }}" >> $GITHUB_OUTPUT
+            echo "ref=${{ github.event.client_payload.ref || 'main' }}" >> $GITHUB_OUTPUT
+          else
+            echo "repo_name=${{ inputs.repo_name }}" >> $GITHUB_OUTPUT
+            echo "event_type=${{ inputs.event_type }}" >> $GITHUB_OUTPUT
+            echo "ref=${{ inputs.ref }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Append new dispatch step to trigger workflow
+        env:
+          REPO_NAME: ${{ steps.resolve.outputs.repo_name }}
+          EVENT_TYPE: ${{ steps.resolve.outputs.event_type }}
+          REF: ${{ steps.resolve.outputs.ref }}
+        run: |
+          WORKFLOW_FILE=".github/workflows/trigger-repos.yml"
+          STEP_NAME=$(echo "$REPO_NAME" | cut -d'/' -f2)  # e.g. A999
+
+          # Bail out if this repo already has a step in the workflow
+          if grep -q "repos/${REPO_NAME}/dispatches" "$WORKFLOW_FILE"; then
+            echo "Step for ${REPO_NAME} already exists. Skipping."
+            exit 0
+          fi
+
+          # Append the new step to the end of the file
+          cat >> "$WORKFLOW_FILE" << EOF
+
+          - name: ${STEP_NAME}
+            env:
+              GH_TOKEN: \${{ steps.generate-token.outputs.token }}
+            run: |
+              curl -X POST \\
+                -H "Accept: application/vnd.github+json" \\
+                -H "Authorization: Bearer \$GH_TOKEN" \\
+                https://api.github.com/repos/${REPO_NAME}/dispatches \\
+                -d '{"event_type":"${EVENT_TYPE}","client_payload":{"ref":"${REF}"}}'
+          EOF
+
+          echo "Added dispatch step for ${REPO_NAME}"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/trigger-repos.yml
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Add dispatch step for ${{ steps.resolve.outputs.repo_name }}"
+          git push
