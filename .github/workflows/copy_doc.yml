@@ -1,0 +1,41 @@
+name: Copy to A000_Entrypage
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  # [pull_request_target]
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'models/*'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  pushEntrypage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: export env
+      uses: cardinalby/export-env-action@v1
+      with:
+        envFile: '.env'    
+        expand: 'true'
+    - name: Push File
+      uses: dmnemec/copy_file_to_another_repo_action@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_GITHUB_TOKEN}}
+      with: 
+        source_file: 'models/.'
+        destination_repo: 'ch-sz-geo/A000_entrypage'
+        destination_folder: 'models'
+        user_email: ${{env.USER_EMAIL}}
+        user_name: ${{env.USER_NAME}}
+        commit_message: 'Update Data Files'
