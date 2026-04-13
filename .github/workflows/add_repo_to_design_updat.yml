@@ -26,6 +26,15 @@ jobs:
   add_dispatch_step:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}  # scopes token to whole org
+          repository: "Test_DefaultDesigne"
+      
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -72,20 +81,13 @@ jobs:
           EOF
 
           echo "Added dispatch step for ${REPO_NAME}"
-
-      - name: Generate GitHub App Token
-        id: generate-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}  # scopes token to whole org
-
       
       - name: Commit and push changes
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${APP_TOKEN}@github.com/${{ github.repository }}.git
+           
           git add .github/workflows/trigger-repos.yml
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "Add dispatch step for ${{ steps.resolve.outputs.repo_name }}"
