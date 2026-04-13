@@ -37,6 +37,8 @@ jobs:
       
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
 
       - name: Resolve inputs
         id: resolve
@@ -86,7 +88,6 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${APP_TOKEN}@github.com/${{ github.repository }}.git
            
           git add .github/workflows/trigger-repos.yml
           git diff --cached --quiet && echo "No changes to commit" && exit 0
