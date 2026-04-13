@@ -68,12 +68,16 @@ jobs:
             exit 0
           fi
 
+          dollar="\$"
+          curly="\{"
+
+          
           # Append the new step to the end of the file
           cat >> "$WORKFLOW_FILE" << EOF
 
           - name: ${STEP_NAME}
             env:
-              GH_TOKEN: "${{ '${{' }} steps.generate-token.outputs.token }}"
+              GH_TOKEN: "$dollar$curly$currly steps.generate-token.outputs.token }}"
             run: |
               curl -X POST \\
                 -H "Accept: application/vnd.github+json" \\
