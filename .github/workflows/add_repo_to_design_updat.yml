@@ -73,6 +73,15 @@ jobs:
 
           echo "Added dispatch step for ${REPO_NAME}"
 
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}  # scopes token to whole org
+
+      
       - name: Commit and push changes
         run: |
           git config user.name  "github-actions[bot]"
