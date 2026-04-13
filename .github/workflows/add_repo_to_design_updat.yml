@@ -68,8 +68,7 @@ jobs:
             exit 0
           fi
 
-          dollar="\$"
-          curly="{"
+          dollar="\$\{\{"
 
           
           # Append the new step to the end of the file
