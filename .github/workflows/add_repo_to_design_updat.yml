@@ -59,7 +59,7 @@ jobs:
           EVENT_TYPE: ${{ steps.resolve.outputs.event_type }}
           REF: ${{ steps.resolve.outputs.ref }}
         run: |
-          WORKFLOW_FILE=".github/workflows/trigger-repos.yml"
+          WORKFLOW_FILE=".github/workflows/design_update.yml"
           STEP_NAME=$(echo "$REPO_NAME" | cut -d'/' -f2)  # e.g. A999
 
           # Bail out if this repo already has a step in the workflow
