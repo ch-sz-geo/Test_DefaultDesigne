@@ -71,7 +71,7 @@ jobs:
           dollar="\$"
           curly="{{"
           
-          # Append the new step to the end of the file
+          # Append the new step to the end of the file (the indentation is important so it is still a valid yml file after the append)
           cat >> "$WORKFLOW_FILE" << EOF
 
                 - name: ${STEP_NAME}
